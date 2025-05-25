@@ -1,6 +1,7 @@
 import SwiftUI
 import Combine
 import UserNotifications
+import Charts
 
 // MARK: - ViewModel
 @MainActor
@@ -144,4 +145,189 @@ class LiveVisualizationViewModel: ObservableObject {
     func stop() {
         timerCancellable?.cancel()
     }
+}
+
+struct LiveVisualizationView: View {
+    @StateObject private var viewModel = LiveVisualizationViewModel()
+    
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Game Selection
+                    if let selectedGame = viewModel.selectedGame {
+                        gameDetailsSection(for: selectedGame)
+                    } else {
+                        gameSelectionSection
+                    }
+                    
+                    if viewModel.selectedGame != nil {
+                        // Live Score
+                        if !viewModel.liveScores.isEmpty {
+                            scoreSection
+                        }
+                        
+                        // Odds Movement
+                        if !viewModel.oddsHistory.isEmpty {
+                            oddsSection
+                        }
+                        
+                        // Heatmap
+                        if !viewModel.heatmapData.isEmpty {
+                            heatmapSection
+                        }
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("Live Visualization")
+            .onDisappear {
+                viewModel.stop()
+            }
+        }
+    }
+    
+    private var gameSelectionSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Select a Game")
+                .font(.title2)
+                .bold()
+            
+            if viewModel.games.isEmpty {
+                EmptyStateView(
+                    title: "No Games Available",
+                    message: "Check back later for live games",
+                    systemImage: "sportscourt"
+                )
+            } else {
+                ForEach(viewModel.games) { game in
+                    Button {
+                        viewModel.select(game: game)
+                    } label: {
+                        GameRowView(game: game)
+                    }
+                }
+            }
+        }
+    }
+    
+    private func gameDetailsSection(for game: Game) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("\(game.awayTeam) @ \(game.homeTeam)")
+                    .font(.title2)
+                    .bold()
+                Spacer()
+                Button("Change") {
+                    viewModel.selectedGame = nil
+                }
+            }
+            
+            Text(game.startTime.formatted(.dateTime))
+                .foregroundColor(.secondary)
+        }
+    }
+    
+    private var scoreSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Live Score")
+                .font(.title2)
+                .bold()
+            
+            if let lastScore = viewModel.liveScores.last {
+                HStack {
+                    Text("\(lastScore.awayScore)")
+                        .font(.largeTitle)
+                    Text("-")
+                        .font(.title)
+                    Text("\(lastScore.homeScore)")
+                        .font(.largeTitle)
+                }
+                .frame(maxWidth: .infinity)
+                
+                // Score Chart
+                Chart(viewModel.liveScores, id: \.timestamp) { score in
+                    LineMark(
+                        x: .value("Time", score.timestamp),
+                        y: .value("Home", score.homeScore),
+                        series: .value("Team", "Home")
+                    )
+                    .foregroundStyle(.blue)
+                    
+                    LineMark(
+                        x: .value("Time", score.timestamp),
+                        y: .value("Away", score.awayScore),
+                        series: .value("Team", "Away")
+                    )
+                    .foregroundStyle(.red)
+                }
+                .frame(height: 200)
+            }
+        }
+    }
+    
+    private var oddsSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Odds Movement")
+                .font(.title2)
+                .bold()
+            
+            Chart(viewModel.oddsHistory, id: \.timestamp) { point in
+                LineMark(
+                    x: .value("Time", point.timestamp),
+                    y: .value("Price", point.price)
+                )
+                .foregroundStyle(.green)
+            }
+            .frame(height: 200)
+        }
+    }
+    
+    private var heatmapSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Activity Heatmap")
+                .font(.title2)
+                .bold()
+            
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 10) {
+                ForEach(Array(viewModel.heatmapData.keys.sorted()), id: \.self) { team in
+                    let intensity = viewModel.heatmapData[team] ?? 0
+                    VStack {
+                        Text(team)
+                            .font(.caption)
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.blue.opacity(Double(intensity) / 10.0))
+                            .frame(height: 40)
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct GameRowView: View {
+    let game: Game
+    
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading) {
+                Text("\(game.awayTeam) @ \(game.homeTeam)")
+                    .font(.headline)
+                Text(game.startTime.formatted(.dateTime))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            Spacer()
+            Image(systemName: "chevron.right")
+                .foregroundColor(.secondary)
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(radius: 2)
+    }
+}
+
+#Preview {
+    LiveVisualizationView()
 } 

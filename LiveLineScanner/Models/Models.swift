@@ -107,6 +107,18 @@ struct SportType: Codable, Hashable, Identifiable {
     ]
 }
 
+// Sport model for the-odds-api.com
+struct APISport: Codable, Identifiable {
+    let key: String
+    let group: String
+    let title: String
+    let description: String
+    let active: Bool
+    let has_outrights: Bool
+    
+    var id: String { key }
+}
+
 struct EventOdds: Codable {
     let bookmakers: [Bookmaker]
 }

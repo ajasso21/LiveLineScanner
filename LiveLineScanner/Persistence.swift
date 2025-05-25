@@ -14,10 +14,23 @@ struct PersistenceController {
     static let preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
-        for _ in 0..<10 {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
+        
+        // Create sample sports
+        let sports = ["NFL", "NBA", "MLB", "NHL"]
+        for sportName in sports {
+            let sport = Sport(context: viewContext)
+            sport.id = UUID()
+            sport.name = sportName
+            
+            // Create some teams for each sport
+            for _ in 1...3 {
+                let team = Team(context: viewContext)
+                team.id = UUID()
+                team.name = "Team \(UUID().uuidString.prefix(4))"
+                team.sport = sport
+            }
         }
+        
         do {
             try viewContext.save()
         } catch {

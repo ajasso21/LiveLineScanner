@@ -27,14 +27,14 @@ extension Team {
     }
     
     var netProfit: Decimal {
-        (settledBets.reduce(Decimal(0)) { sum, bet in
+        settledBets.reduce(Decimal(0)) { sum, bet in
             if bet.status == Bet.Status.won.rawValue {
-                return sum + (bet.payout as? Decimal ?? 0)
+                return sum + ((bet.payout as NSDecimalNumber?)?.decimalValue ?? 0)
             } else if bet.status == Bet.Status.lost.rawValue {
                 return sum - bet.amount
             }
             return sum
-        })
+        }
     }
     
     var winRate: Double {

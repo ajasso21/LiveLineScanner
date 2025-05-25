@@ -4,7 +4,7 @@ import Foundation
 
 @MainActor
 class OddsComparisonViewModel: ObservableObject {
-    @Published var sports: [Sport] = []
+    @Published var sports: [APISport] = []
     @Published var bestLines: [OddsLine] = []
     @Published var allMarkets: [String] = []
     @Published var allBooks: [String] = []
@@ -17,11 +17,11 @@ class OddsComparisonViewModel: ObservableObject {
         let url = URL(string: "https://api.the-odds-api.com/v4/sports/?apiKey=\(apiKey)")!
         do {
             let (data, _) = try await session.data(from: url)
-            sports = try JSONDecoder().decode([Sport].self, from: data)
+            sports = try JSONDecoder().decode([APISport].self, from: data)
         } catch { print(error) }
     }
 
-    func fetchBestLines(for sport: Sport) async {
+    func fetchBestLines(for sport: APISport) async {
         let urlString =
         "https://api.the-odds-api.com/v4/sports/\(sport.key)/odds/?apiKey=\(apiKey)&regions=us&markets=h2h,spreads,player_points"
         guard let url = URL(string: urlString) else { return }

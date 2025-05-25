@@ -77,9 +77,9 @@ struct BetTrackerView: View {
     private var summarySection: some View {
         VStack(spacing: 15) {
             // Bankroll Card
-            SummaryCard(title: "Current Bankroll", value: currentBankroll.formatted(.currency(code: "USD"))) {
+            SummaryCard(title: "Current Bankroll", value: formatCurrency(currentBankroll)) {
                 HStack(spacing: 20) {
-                    StatItem(title: "Net Profit", value: netProfit.formatted(.currency(code: "USD")), color: netProfit >= 0 ? .green : .red)
+                    StatItem(title: "Net Profit", value: formatCurrency(netProfit), color: netProfit >= 0 ? .green : .red)
                     StatItem(title: "Win Rate", value: "\(Int(winRate * 100))%", color: .blue)
                 }
             }
@@ -153,9 +153,9 @@ struct BetTrackerView: View {
     private var currentBankroll: Decimal {
         transactions.reduce(Decimal(0)) { sum, transaction in
             if transaction.isDeposit {
-                return sum + transaction.amount
+                return sum + (transaction.amount as NSDecimalNumber).decimalValue
             } else {
-                return sum - transaction.amount
+                return sum - (transaction.amount as NSDecimalNumber).decimalValue
             }
         }
     }
@@ -163,9 +163,9 @@ struct BetTrackerView: View {
     private var netProfit: Decimal {
         settledBets.reduce(Decimal(0)) { sum, bet in
             if bet.betStatus == .won {
-                return sum + (bet.payout ?? 0)
+                return sum + ((bet.payout as NSDecimalNumber?)?.decimalValue ?? 0)
             } else if bet.betStatus == .lost {
-                return sum - bet.amount
+                return sum - (bet.amount as NSDecimalNumber).decimalValue
             }
             return sum
         }
@@ -178,9 +178,17 @@ struct BetTrackerView: View {
     }
     
     private var roi: Double {
-        let totalWagered = settledBets.reduce(Decimal(0)) { $0 + $1.amount }
+        let totalWagered = settledBets.reduce(Decimal(0)) { $0 + (($1.amount as NSDecimalNumber).decimalValue) }
         guard totalWagered > 0 else { return 0 }
         return Double(netProfit / totalWagered)
+    }
+    
+    // MARK: - Helper Functions
+    private func formatCurrency(_ value: Decimal) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.maximumFractionDigits = 2
+        return formatter.string(from: NSDecimalNumber(decimal: value)) ?? "$0.00"
     }
 }
 
@@ -248,8 +256,8 @@ struct QuickActionButton: View {
         .frame(maxWidth: .infinity)
         .padding()
         .background(color.opacity(0.1))
-        .foregroundColor(color)
         .cornerRadius(12)
+        .foregroundColor(color)
     }
 }
 

@@ -13,7 +13,7 @@ extension BankrollTransaction {
     
     // MARK: - Computed Properties
     
-    @objc var transactionType: TransactionType {
+    var transactionType: TransactionType {
         get {
             TransactionType(rawValue: type ?? TransactionType.deposit.rawValue) ?? .deposit
         }
@@ -26,15 +26,15 @@ extension BankrollTransaction {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
         formatter.maximumFractionDigits = 2
-        return formatter.string(from: NSDecimalNumber(decimal: amount)) ?? "$0.00"
+        return formatter.string(from: amount ?? 0) ?? "$0.00"
     }
     
     @objc var isDeposit: Bool {
-        transactionType == .deposit || transactionType == .betWin
+        type == TransactionType.deposit.rawValue || type == TransactionType.betWin.rawValue
     }
     
     @objc var isWithdrawal: Bool {
-        transactionType == .withdrawal || transactionType == .betLoss
+        type == TransactionType.withdrawal.rawValue || type == TransactionType.betLoss.rawValue
     }
     
     // MARK: - Convenience Methods
@@ -45,7 +45,7 @@ extension BankrollTransaction {
                       notes: String? = nil) -> BankrollTransaction {
         let transaction = BankrollTransaction(context: context)
         transaction.id = UUID()
-        transaction.amount = amount
+        transaction.amount = amount as NSDecimalNumber
         transaction.type = type.rawValue
         transaction.createdAt = Date()
         transaction.notes = notes

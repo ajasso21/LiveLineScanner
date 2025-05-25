@@ -158,4 +158,4 @@ struct EventDetailsView: View {
     private func checkNotificationStatus() async {
         hasNotification = await notificationManager.hasNotification(for: event.id)
     }
-} 
+}

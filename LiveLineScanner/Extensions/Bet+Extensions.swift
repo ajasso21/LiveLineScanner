@@ -22,7 +22,7 @@ extension Bet {
     
     // MARK: - Computed Properties
     
-    @objc var betStatus: Status {
+    var betStatus: Status {
         get {
             Status(rawValue: status ?? Status.open.rawValue) ?? .open
         }
@@ -31,7 +31,7 @@ extension Bet {
         }
     }
     
-    @objc var betType: BetType {
+    var betType: BetType {
         get {
             BetType(rawValue: type ?? BetType.moneyline.rawValue) ?? .moneyline
         }
@@ -40,11 +40,16 @@ extension Bet {
         }
     }
     
+    var decimalAmount: Decimal {
+        get { (amount ?? 0) as Decimal }
+        set { amount = NSDecimalNumber(decimal: newValue) }
+    }
+    
     var formattedAmount: String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
         formatter.maximumFractionDigits = 2
-        return formatter.string(from: NSDecimalNumber(decimal: amount)) ?? "$0.00"
+        return formatter.string(from: amount ?? 0) ?? "$0.00"
     }
     
     var formattedOdds: String {
@@ -56,9 +61,9 @@ extension Bet {
     
     var potentialPayout: Decimal {
         if odds >= 0 {
-            return amount * (Decimal(odds) / 100)
+            return decimalAmount * (Decimal(odds) / 100)
         } else {
-            return amount / (Decimal(abs(odds)) / 100)
+            return decimalAmount / (Decimal(abs(odds)) / 100)
         }
     }
     
@@ -89,7 +94,7 @@ extension Bet {
                       notes: String? = nil) -> Bet {
         let bet = Bet(context: context)
         bet.id = UUID()
-        bet.amount = amount
+        bet.amount = NSDecimalNumber(decimal: amount)
         bet.odds = odds
         bet.type = type.rawValue
         bet.status = Status.open.rawValue
@@ -102,9 +107,9 @@ extension Bet {
     }
     
     func settle(as status: Status, withPayout payout: Decimal? = nil) {
-        self.betStatus = status
+        self.status = status.rawValue
         self.settledAt = Date()
-        self.payout = payout
+        self.payout = payout.map { NSDecimalNumber(decimal: $0) }
     }
     
     func cancel() {
