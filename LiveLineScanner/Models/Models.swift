@@ -79,7 +79,7 @@ struct Competitor: Codable {
     let qualifier: String  // "home" or "away"
 }
 
-struct Sport: Codable, Hashable, Identifiable {
+struct SportType: Codable, Hashable, Identifiable {
     let key: String
     let title: String
     
@@ -87,10 +87,6 @@ struct Sport: Codable, Hashable, Identifiable {
     
     func hash(into hasher: inout Hasher) {
         hasher.combine(key)
-    }
-    
-    static func == (lhs: Sport, rhs: Sport) -> Bool {
-        lhs.key == rhs.key
     }
     
     static let mappings: [String: String] = [
@@ -310,7 +306,7 @@ final class NotificationManager: ObservableObject {
 // MARK: - Game Browser View Model
 @MainActor
 class GameBrowserViewModel: ObservableObject {
-    @Published var sports: [Sport] = []
+    @Published var sports: [SportType] = []
     @Published var events: [String: [Event]] = [:]    // sportKey → events
     @Published var isLoading = false
     @Published var errorMessage: String?
@@ -358,9 +354,9 @@ class GameBrowserViewModel: ObservableObject {
             
             // Create Sport objects with mapped titles
             let newSports = sportKeys.map { key in
-                Sport(
+                SportType(
                     key: key,
-                    title: Sport.mappings[key] ?? key.replacingOccurrences(of: "sr:sport:", with: "")
+                    title: SportType.mappings[key] ?? key.replacingOccurrences(of: "sr:sport:", with: "")
                 )
             }.sorted(by: { $0.title < $1.title })
             
@@ -392,7 +388,7 @@ class GameBrowserViewModel: ObservableObject {
     }
 
     /// 2) Fetch upcoming/live events for a sport
-    func fetchEvents(for sport: Sport) async throws {
+    func fetchEvents(for sport: SportType) async throws {
         // Check if we need to throttle API calls
         if await cache.shouldThrottle(forSport: sport.key) {
             return
@@ -443,7 +439,7 @@ class GameBrowserViewModel: ObservableObject {
         }
     }
     
-    private func updateEvents(for sport: Sport, with schedules: [ScheduleResponse]) {
+    private func updateEvents(for sport: SportType, with schedules: [ScheduleResponse]) {
         // Convert schedule responses to Event models
         let sportEvents = schedules.compactMap { schedule -> Event? in
             let sportEvent = schedule.sport_event
@@ -478,7 +474,7 @@ class GameBrowserViewModel: ObservableObject {
     }
     
     /// Force refresh a specific sport's events
-    func forceRefresh(sport: Sport) async throws {
+    func forceRefresh(sport: SportType) async throws {
         await cache.clearCache(forSport: sport.key)
         try await fetchEvents(for: sport)
     }

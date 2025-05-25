@@ -1,3 +1,7 @@
+import SwiftUI
+import Combine
+import UserNotifications
+
 // MARK: - ViewModel
 @MainActor
 class LiveVisualizationViewModel: ObservableObject {

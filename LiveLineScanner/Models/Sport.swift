@@ -1,6 +1,7 @@
 import Foundation
 import CoreData
 
-@objc(LiveLineScanner_Sport)
+@objc(Sport)
 public class Sport: NSManagedObject {
+    // Core Data managed class
 } 

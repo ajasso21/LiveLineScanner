@@ -14,18 +14,18 @@ actor OddsCache {
         let data: T
     }
     
-    private var sportsCache: CacheEntry<[Sport]>?
+    private var sportsCache: CacheEntry<[SportType]>?
     private var eventsCache: [String: CacheEntry<[ScheduleResponse]>] = [:]
     
     private init() {}
     
     // MARK: - Sports Cache
     
-    func cacheSports(_ sports: [Sport]) {
+    func cacheSports(_ sports: [SportType]) {
         sportsCache = CacheEntry(timestamp: Date(), data: sports)
     }
     
-    func getCachedSports() -> [Sport]? {
+    func getCachedSports() -> [SportType]? {
         guard let cache = sportsCache,
               Date().timeIntervalSince(cache.timestamp) < sportsCacheTime
         else {
