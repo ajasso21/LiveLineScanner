@@ -13,7 +13,7 @@ extension BankrollTransaction {
     
     // MARK: - Computed Properties
     
-    var transactionType: TransactionType {
+    @objc var transactionType: TransactionType {
         get {
             TransactionType(rawValue: type ?? TransactionType.deposit.rawValue) ?? .deposit
         }
@@ -29,17 +29,17 @@ extension BankrollTransaction {
         return formatter.string(from: NSDecimalNumber(decimal: amount)) ?? "$0.00"
     }
     
-    var isDeposit: Bool {
+    @objc var isDeposit: Bool {
         transactionType == .deposit || transactionType == .betWin
     }
     
-    var isWithdrawal: Bool {
+    @objc var isWithdrawal: Bool {
         transactionType == .withdrawal || transactionType == .betLoss
     }
     
     // MARK: - Convenience Methods
     
-    static func create(in context: NSManagedObjectContext,
+    @nonobjc static func create(in context: NSManagedObjectContext,
                       amount: Decimal,
                       type: TransactionType,
                       notes: String? = nil) -> BankrollTransaction {
@@ -52,19 +52,19 @@ extension BankrollTransaction {
         return transaction
     }
     
-    static func createDeposit(in context: NSManagedObjectContext,
+    @nonobjc static func createDeposit(in context: NSManagedObjectContext,
                             amount: Decimal,
                             notes: String? = nil) -> BankrollTransaction {
         return create(in: context, amount: amount, type: .deposit, notes: notes)
     }
     
-    static func createWithdrawal(in context: NSManagedObjectContext,
+    @nonobjc static func createWithdrawal(in context: NSManagedObjectContext,
                                amount: Decimal,
                                notes: String? = nil) -> BankrollTransaction {
         return create(in: context, amount: amount, type: .withdrawal, notes: notes)
     }
     
-    static func createBetResult(in context: NSManagedObjectContext,
+    @nonobjc static func createBetResult(in context: NSManagedObjectContext,
                               amount: Decimal,
                               isWin: Bool,
                               notes: String? = nil) -> BankrollTransaction {

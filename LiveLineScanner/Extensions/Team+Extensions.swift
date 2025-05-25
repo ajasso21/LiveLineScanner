@@ -4,33 +4,33 @@ import CoreData
 extension Team {
     // MARK: - Computed Properties
     
-    var betCount: Int {
-        (bets?.count ?? 0)
+    @objc var betCount: Int {
+        (placedBets?.count ?? 0)
     }
     
     var activeBets: [Bet] {
-        bets?.allObjects.compactMap { bet in
+        placedBets?.allObjects.compactMap { bet in
             let bet = bet as! Bet
-            return bet.betStatus == .open ? bet : nil
+            return bet.status == Bet.Status.open.rawValue ? bet : nil
         } ?? []
     }
     
     var settledBets: [Bet] {
-        bets?.allObjects.compactMap { bet in
+        placedBets?.allObjects.compactMap { bet in
             let bet = bet as! Bet
-            return bet.betStatus != .open ? bet : nil
+            return bet.status != Bet.Status.open.rawValue ? bet : nil
         } ?? []
     }
     
     var totalWagered: Decimal {
-        (bets?.allObjects as? [Bet])?.reduce(Decimal(0)) { $0 + $1.amount } ?? 0
+        (placedBets?.allObjects as? [Bet])?.reduce(Decimal(0)) { $0 + $1.amount } ?? 0
     }
     
     var netProfit: Decimal {
         (settledBets.reduce(Decimal(0)) { sum, bet in
-            if bet.betStatus == .won {
+            if bet.status == Bet.Status.won.rawValue {
                 return sum + (bet.payout ?? 0)
-            } else if bet.betStatus == .lost {
+            } else if bet.status == Bet.Status.lost.rawValue {
                 return sum - bet.amount
             }
             return sum
@@ -38,7 +38,7 @@ extension Team {
     }
     
     var winRate: Double {
-        let wonBets = settledBets.filter { $0.betStatus == .won }.count
+        let wonBets = settledBets.filter { $0.status == Bet.Status.won.rawValue }.count
         let totalSettled = settledBets.count
         guard totalSettled > 0 else { return 0 }
         return Double(wonBets) / Double(totalSettled)
@@ -46,7 +46,7 @@ extension Team {
     
     // MARK: - Convenience Methods
     
-    static func create(in context: NSManagedObjectContext,
+    @nonobjc static func create(in context: NSManagedObjectContext,
                       name: String,
                       sport: Sport) -> Team {
         let team = Team(context: context)
@@ -56,16 +56,16 @@ extension Team {
         return team
     }
     
-    static func fetch(in context: NSManagedObjectContext,
+    @nonobjc static func fetch(in context: NSManagedObjectContext,
                      name: String,
                      sport: Sport) -> Team? {
-        let request = NSFetchRequest<Team>(entityName: "Team")
+        let request = Team.fetchRequest()
         request.predicate = NSPredicate(format: "name == %@ AND sport == %@", name, sport)
         request.fetchLimit = 1
         return try? context.fetch(request).first
     }
     
-    static func fetchOrCreate(in context: NSManagedObjectContext,
+    @nonobjc static func fetchOrCreate(in context: NSManagedObjectContext,
                             name: String,
                             sport: Sport) -> Team {
         if let existing = fetch(in: context, name: name, sport: sport) {

@@ -22,7 +22,7 @@ extension Bet {
     
     // MARK: - Computed Properties
     
-    var betStatus: Status {
+    @objc var betStatus: Status {
         get {
             Status(rawValue: status ?? Status.open.rawValue) ?? .open
         }
@@ -31,7 +31,7 @@ extension Bet {
         }
     }
     
-    var betType: BetType {
+    @objc var betType: BetType {
         get {
             BetType(rawValue: type ?? BetType.moneyline.rawValue) ?? .moneyline
         }
@@ -69,7 +69,7 @@ extension Bet {
         return formatter.string(from: NSDecimalNumber(decimal: potentialPayout)) ?? "$0.00"
     }
     
-    var isSettled: Bool {
+    @objc var isSettled: Bool {
         settledAt != nil
     }
     
@@ -80,7 +80,7 @@ extension Bet {
     
     // MARK: - Convenience Methods
     
-    static func create(in context: NSManagedObjectContext,
+    @nonobjc static func create(in context: NSManagedObjectContext,
                       amount: Decimal,
                       odds: Double,
                       type: BetType,
