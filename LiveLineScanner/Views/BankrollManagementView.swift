@@ -19,9 +19,9 @@ struct BankrollManagementView: View {
     private var currentBankroll: Decimal {
         transactions.reduce(Decimal(0)) { sum, transaction in
             if transaction.isDeposit {
-                return sum + transaction.amount
+                return sum + ((transaction.amount as NSDecimalNumber?)?.decimalValue ?? 0)
             } else {
-                return sum - transaction.amount
+                return sum - ((transaction.amount as NSDecimalNumber?)?.decimalValue ?? 0)
             }
         }
     }
@@ -166,7 +166,7 @@ struct AddTransactionView: View {
             return
         }
         
-        let transaction = BankrollTransaction.create(
+        _ = BankrollTransaction.create(
             in: context,
             amount: amount,
             type: transactionType,

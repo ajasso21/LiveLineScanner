@@ -4,6 +4,18 @@ import SwiftUI
 struct MainTabView: View {
     @StateObject private var gameBrowserVM = GameBrowserViewModel()
     
+    init() {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor.black
+        appearance.stackedLayoutAppearance.selected.iconColor = UIColor(named: "AccentColor")
+        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor(named: "AccentColor")!]
+        UITabBar.appearance().standardAppearance = appearance
+        if #available(iOS 15.0, *) {
+            UITabBar.appearance().scrollEdgeAppearance = appearance
+        }
+    }
+    
     var body: some View {
         TabView {
             // 1) Live Visualization Dashboard
@@ -14,6 +26,7 @@ struct MainTabView: View {
             
             // 2) Your live-line scanner value moves
             ContentView()
+                .environmentObject(gameBrowserVM)
                 .tabItem {
                     Label("Value Moves", systemImage: "chart.line.uptrend.xyaxis")
                 }
@@ -26,12 +39,14 @@ struct MainTabView: View {
             
             // 4) Game browser & detailed odds
             GameBrowserView()
+                .environmentObject(gameBrowserVM)
                 .tabItem {
                     Label("Games & Odds", systemImage: "sportscourt")
                 }
             
             // 5) Odds Comparison Aggregator
             OddsComparisonView()
+                .environmentObject(gameBrowserVM)
                 .tabItem {
                     Label("Compare Odds", systemImage: "chart.bar")
                 }
@@ -48,6 +63,5 @@ struct MainTabView: View {
                     Label("Alerts", systemImage: "bell")
                 }
         }
-        .environmentObject(gameBrowserVM)
     }
 }

@@ -2,12 +2,12 @@ import SwiftUI
 
 // MARK: - Supporting Views
 struct FavoritesSectionView: View {
-    let sports: [Sport]
+    let sports: [SportType]
     let favorites: Set<String>
     let expandedEvents: Set<String>
     let sortedEventsForSport: (String) -> [Event]
     let onEventTap: (Event) -> Void
-    let onSportTap: (Sport) -> Void
+    let onSportTap: (SportType) -> Void
     
     var body: some View {
         Section("Favorites") {
@@ -26,37 +26,26 @@ struct FavoritesSectionView: View {
     }
 }
 
-struct AllSportsSection: View {
-    let sports: [Sport]
+struct AllSportsSectionView: View {
+    let sports: [SportType]
     let favorites: Set<String>
     let expandedEvents: Set<String>
     let sortedEventsForSport: (String) -> [Event]
     let onEventTap: (Event) -> Void
-    let onSportTap: (Sport) -> Void
-    let onFavorite: (Sport) -> Void
+    let onSportTap: (SportType) -> Void
     
     var body: some View {
-        Section(favorites.isEmpty ? "" : "All Sports") {
-            ForEach(sports) { sport in
-                if !favorites.contains(sport.key) {
-                    SportRow(
-                        sport: sport,
-                        events: sortedEventsForSport(sport.key),
-                        isExpanded: expandedEvents.contains(sport.key),
-                        isFavorite: false,
-                        onEventTap: onEventTap
-                    )
-                    .sportRowStyle(isExpanded: expandedEvents.contains(sport.key))
-                    .onTapGesture { onSportTap(sport) }
-                    .swipeActions(edge: .leading) {
-                        Button {
-                            onFavorite(sport)
-                        } label: {
-                            Label("Favorite", systemImage: "star.fill")
-                        }
-                        .tint(.yellow)
-                    }
-                }
+        Section("All Sports") {
+            ForEach(sports.filter { !favorites.contains($0.key) }) { sport in
+                SportRow(
+                    sport: sport,
+                    events: sortedEventsForSport(sport.key),
+                    isExpanded: expandedEvents.contains(sport.key),
+                    isFavorite: false,
+                    onEventTap: onEventTap
+                )
+                .sportRowStyle(isExpanded: expandedEvents.contains(sport.key))
+                .onTapGesture { onSportTap(sport) }
             }
         }
     }
@@ -64,150 +53,78 @@ struct AllSportsSection: View {
 
 // MARK: - Main View
 struct GameBrowserView: View {
-    @StateObject private var vm = GameBrowserViewModel()
-    @StateObject private var refreshManager = BackgroundRefreshManager.shared
-    @State private var expandedEvents: Set<String> = []
-    @State private var searchText = ""
-    @State private var favorites: Set<String> = [] {
-        didSet {
-            withAnimation(.spring(response: 0.3)) {
-                // This triggers a view update with animation when favorites changes
-            }
-        }
-    }
-    @State private var selectedEvent: Event?
-    @State private var showingEventDetails = false
-    @State private var showingSortOptions = false
-    
-    var filteredSports: [Sport] {
-        if searchText.isEmpty {
-            return vm.sports
-        }
-        return vm.sports.filter { sport in
-            sport.title.localizedCaseInsensitiveContains(searchText) ||
-            vm.events[sport.key]?.contains { event in
-                event.homeTeam.localizedCaseInsensitiveContains(searchText) ||
-                event.awayTeam.localizedCaseInsensitiveContains(searchText)
-            } ?? false
-        }
-    }
+    @EnvironmentObject private var viewModel: GameBrowserViewModel
+    @Environment(\.managedObjectContext) private var viewContext
+    @State private var showSettings = false
+    @State private var showEventDetail: Event?
+    @State private var favorites: Set<String> = []
+    @State private var expandedSports: Set<String> = []
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                RefreshStatusView(refreshManager: refreshManager)
-                    .padding(.horizontal)
-                    .padding(.vertical, 4)
+            List {
+                if !favorites.isEmpty {
+                    FavoritesSectionView(
+                        sports: viewModel.sports,
+                        favorites: favorites,
+                        expandedEvents: expandedSports,
+                        sortedEventsForSport: viewModel.sortedEvents,
+                        onEventTap: { event in
+                            showEventDetail = event
+                        },
+                        onSportTap: toggleFavorite
+                    )
+                }
                 
-                List {
-                    if vm.sports.isEmpty && !vm.isLoading {
-                        Text("No sports available")
-                            .foregroundColor(.secondary)
-                            .padding()
-                    } else {
-                        if !favorites.isEmpty {
-                            FavoritesSectionView(
-                                sports: vm.sports,
-                                favorites: favorites,
-                                expandedEvents: expandedEvents,
-                                sortedEventsForSport: vm.sortedEvents,
-                                onEventTap: { event in
-                                    selectedEvent = event
-                                    showingEventDetails = true
-                                },
-                                onSportTap: toggleSport
-                            )
-                        }
-                        
-                        AllSportsSection(
-                            sports: filteredSports,
-                            favorites: favorites,
-                            expandedEvents: expandedEvents,
-                            sortedEventsForSport: vm.sortedEvents,
-                            onEventTap: { event in
-                                selectedEvent = event
-                                showingEventDetails = true
-                            },
-                            onSportTap: toggleSport,
-                            onFavorite: { sport in
-                                favorites.insert(sport.key)
-                            }
-                        )
-                    }
-                }
-                .searchable(text: $searchText, prompt: "Search sports or teams")
+                AllSportsSectionView(
+                    sports: viewModel.sports,
+                    favorites: favorites,
+                    expandedEvents: expandedSports,
+                    sortedEventsForSport: viewModel.sortedEvents,
+                    onEventTap: { event in
+                        showEventDetail = event
+                    },
+                    onSportTap: toggleFavorite
+                )
             }
-            .navigationTitle("Available Games")
-            .toolbar(content: toolbarContent)
-            .confirmationDialog("Sort Events", isPresented: $showingSortOptions) {
-                ForEach(EventSortOption.allCases, id: \.rawValue) { option in
-                    Button(option.rawValue) {
-                        withAnimation {
-                            vm.sortOption = option
-                        }
+            .navigationTitle("Live Lines")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { showSettings = true }) {
+                        Image(systemName: "gear")
                     }
                 }
             }
-            .overlay {
-                if vm.isLoading {
-                    LoadingView()
-                }
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
             }
-            .sheet(isPresented: $showingEventDetails) {
-                if let event = selectedEvent {
-                    EventDetailsView(event: event)
-                }
+            .sheet(item: $showEventDetail) { event in
+                OddsDetailView(event: event, viewModel: viewModel)
             }
             .task {
                 do {
-                    try await vm.fetchSports()
+                    try await viewModel.fetchSports()
                 } catch {
-                    // Error is already handled in the view model
-                    print("⚠️ Initial fetch failed:", error)
-                }
-            }
-            .refreshable {
-                do {
-                    try await vm.fetchSports()
-                    for sport in vm.sports where expandedEvents.contains(sport.key) {
-                        try await vm.fetchEvents(for: sport)
-                    }
-                } catch {
-                    // Error is already handled in the view model
-                    print("⚠️ Refresh failed:", error)
+                    print("Failed to fetch sports:", error)
                 }
             }
         }
     }
     
-    @ToolbarContentBuilder
-    private func toolbarContent() -> some ToolbarContent {
-        ToolbarItem(placement: .navigationBarTrailing) {
-            Button {
-                showingSortOptions = true
-            } label: {
-                Label("Sort", systemImage: "arrow.up.arrow.down")
-            }
+    private func toggleFavorite(_ sport: SportType) {
+        if favorites.contains(sport.key) {
+            favorites.remove(sport.key)
+        } else {
+            favorites.insert(sport.key)
         }
     }
-    
-    private func toggleSport(_ sport: Sport) {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-            if expandedEvents.contains(sport.key) {
-                expandedEvents.remove(sport.key)
-            } else {
-                expandedEvents.insert(sport.key)
-                Task {
-                    do {
-                        try await vm.fetchEvents(for: sport)
-                    } catch {
-                        // Error is already handled in the view model
-                        print("⚠️ Sport fetch failed:", error)
-                    }
-                }
-            }
-        }
-    }
+}
+
+#Preview {
+    let viewModel = GameBrowserViewModel()
+    return GameBrowserView()
+        .environmentObject(viewModel)
+        .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }
 
 //  GameBrowserView.swift

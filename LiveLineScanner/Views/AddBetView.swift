@@ -22,100 +22,47 @@ struct AddBetView: View {
     
     private var teams: [Team] {
         guard let sport = selectedSport else { return [] }
-        return (sport.teams?.allObjects as? [Team] ?? []).sorted { $0.name ?? "" < $1.name ?? "" }
+        
+        // Get all teams from the sport
+        let allTeams = sport.teams?.allObjects as? [Team] ?? []
+        
+        // Sort teams by name
+        return allTeams.sorted { team1, team2 in
+            let name1 = team1.name ?? ""
+            let name2 = team2.name ?? ""
+            return name1 < name2
+        }
     }
     
     private var isFormValid: Bool {
-        amount > 0 && odds != 0 && selectedSport != nil
+        // Check if amount is valid
+        let hasValidAmount = amount > 0
+        
+        // Check if odds are valid
+        let hasValidOdds = odds != 0
+        
+        // Check if sport is selected
+        let hasSelectedSport = selectedSport != nil
+        
+        // Combine all conditions
+        let isValid = hasValidAmount && hasValidOdds && hasSelectedSport
+        
+        return isValid
     }
     
     var body: some View {
         NavigationStack {
             Form {
-                // MARK: - Sport & Team Selection
-                Section("Game Details") {
-                    Button(action: { showingSportPicker = true }) {
-                        HStack {
-                            Text("Sport")
-                            Spacer()
-                            Text(selectedSport?.name ?? "Select Sport")
-                                .foregroundColor(selectedSport == nil ? .secondary : .primary)
-                        }
-                    }
-                    
-                    if !teams.isEmpty {
-                        Button(action: { showingTeamPicker = true }) {
-                            HStack {
-                                Text("Team")
-                                Spacer()
-                                Text(selectedTeam?.name ?? "Select Team")
-                                    .foregroundColor(selectedTeam == nil ? .secondary : .primary)
-                            }
-                        }
-                    }
-                }
-                
-                // MARK: - Bet Details
-                Section("Bet Details") {
-                    Picker("Type", selection: $betType) {
-                        ForEach(Bet.BetType.allCases, id: \.self) { type in
-                            Text(type.rawValue).tag(type)
-                        }
-                    }
-                    
-                    HStack {
-                        Text("Amount")
-                        Spacer()
-                        TextField("0.00", value: $amount, format: .currency(code: "USD"))
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                    }
-                    
-                    HStack {
-                        Text("Odds")
-                        Spacer()
-                        TextField("0", value: $odds, format: .number)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-                    }
-                }
-                
-                // MARK: - Additional Info
-                Section("Additional Information") {
-                    TextField("Notes", text: $notes, axis: .vertical)
-                        .lineLimit(3, reservesSpace: true)
-                }
-                
-                // MARK: - Potential Payout
-                if amount > 0 && odds != 0 {
-                    Section {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Potential Payout")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            Text(calculatePotentialPayout().formatted(.currency(code: "USD")))
-                                .font(.headline)
-                        }
-                    }
-                }
+                gameDetailsSection
+                betDetailsSection
+                additionalInfoSection
+                potentialPayoutSection
             }
             .navigationTitle("Place Bet")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Place") {
-                        placeBet()
-                    }
-                    .disabled(!isFormValid)
-                }
-            }
+            .toolbar { toolbarContent }
             .sheet(isPresented: $showingSportPicker) {
-                SportPickerView(sports: Array(sports), selectedSport: $selectedSport)
+                BetSportPickerView(sports: Array(sports), selectedSport: $selectedSport)
             }
             .sheet(isPresented: $showingTeamPicker) {
                 TeamPickerView(teams: teams, selectedTeam: $selectedTeam)
@@ -126,6 +73,96 @@ struct AddBetView: View {
                 }
             } message: {
                 Text(errorMessage ?? "")
+            }
+        }
+    }
+    
+    private var gameDetailsSection: some View {
+        Section("Game Details") {
+            Button(action: { showingSportPicker = true }) {
+                HStack {
+                    Text("Sport")
+                    Spacer()
+                    Text(selectedSport?.name ?? "Select Sport")
+                        .foregroundColor(selectedSport == nil ? .secondary : .primary)
+                }
+            }
+            
+            if !teams.isEmpty {
+                Button(action: { showingTeamPicker = true }) {
+                    HStack {
+                        Text("Team")
+                        Spacer()
+                        Text(selectedTeam?.name ?? "Select Team")
+                            .foregroundColor(selectedTeam == nil ? .secondary : .primary)
+                    }
+                }
+            }
+        }
+    }
+    
+    private var betDetailsSection: some View {
+        Section("Bet Details") {
+            Picker("Type", selection: $betType) {
+                ForEach(Bet.BetType.allCases, id: \.self) { type in
+                    Text(type.rawValue)
+                        .tag(type)
+                }
+            }
+            
+            HStack {
+                Text("Amount")
+                Spacer()
+                TextField("0.00", value: $amount, format: .currency(code: "USD"))
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.trailing)
+            }
+            
+            HStack {
+                Text("Odds")
+                Spacer()
+                TextField("0", value: $odds, format: .number)
+                    .keyboardType(.numberPad)
+                    .multilineTextAlignment(.trailing)
+            }
+        }
+    }
+    
+    private var additionalInfoSection: some View {
+        Section("Additional Information") {
+            TextField("Notes", text: $notes, axis: .vertical)
+                .lineLimit(3, reservesSpace: true)
+        }
+    }
+    
+    private var potentialPayoutSection: some View {
+        Group {
+            if amount > 0 && odds != 0 {
+                Section {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Potential Payout")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        Text(calculatePotentialPayout().formatted(.currency(code: "USD")))
+                            .font(.headline)
+                    }
+                }
+            }
+        }
+    }
+    
+    private var toolbarContent: some ToolbarContent {
+        Group {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") {
+                    dismiss()
+                }
+            }
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Place") {
+                    placeBet()
+                }
+                .disabled(!isFormValid)
             }
         }
     }
@@ -144,7 +181,7 @@ struct AddBetView: View {
             return
         }
         
-        let bet = Bet.create(
+        _ = Bet.create(
             in: context,
             amount: amount,
             odds: odds,
@@ -164,7 +201,7 @@ struct AddBetView: View {
 }
 
 // MARK: - Supporting Views
-struct SportPickerView: View {
+struct BetSportPickerView: View {
     @Environment(\.dismiss) private var dismiss
     let sports: [Sport]
     @Binding var selectedSport: Sport?

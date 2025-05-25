@@ -7,6 +7,9 @@ enum OddsError: Error {
     case networkError(Error)
     case invalidResponse
     case decodingError(Error)
+    case invalidURL
+    case forbidden
+    case rateLimitExceeded
 }
 
 @MainActor
@@ -75,34 +78,47 @@ class SportradarOddsService {
     }
     
     /// Lists upcoming/prematch schedules for a sport
-    func fetchSchedules(
-        product: MarketProduct,
-        sport: String
-    ) async throws -> [ScheduleResponse] {
+    func fetchSchedules(for sport: String? = nil) async throws -> [ScheduleResponse] {
         guard !APIConfig.shared.apiKey.isEmpty else {
             throw OddsError.invalidAPIKey
         }
         
-        let path = (product == .futures) ? "tournaments" : "schedules"
-        let url = makeOddsURL(product: product, sport: sport, pathComponent: path)
+        let baseURL = "https://api.sportradar.com/oddscomparison-prematch/v4/en/odds"
+        let endpoint = sport.map { "\($0)/schedules" } ?? "all/schedules"
+        let urlString = "\(baseURL)/\(endpoint).json?api_key=\(APIConfig.shared.apiKey)"
+        
+        guard let url = URL(string: urlString) else {
+            throw OddsError.invalidURL
+        }
+        
+        print("🌐 Requesting URL: \(baseURL)/\(endpoint).json")
         
         do {
-            let (data, response) = try await session.data(from: url)
+            let (data, response) = try await URLSession.shared.data(from: url)
             
             guard let httpResponse = response as? HTTPURLResponse else {
                 throw OddsError.invalidResponse
             }
             
+            print("📦 API Response: \(String(data: data, encoding: .utf8) ?? "No response data")")
+            
             switch httpResponse.statusCode {
             case 200:
                 do {
-                    return try decoder.decode([ScheduleResponse].self, from: data)
+                    // First try to decode as wrapped response
+                    let wrapper = try JSONDecoder().decode(SportradarResponse.self, from: data)
+                    return wrapper.schedules
                 } catch {
-                    print("⚠️ Decoding error:", error)
-                    throw OddsError.decodingError(error)
+                    // If that fails, try to decode as direct array
+                    return try JSONDecoder().decode([ScheduleResponse].self, from: data)
                 }
             case 401:
+                print("⚠️ Authorization failed. API Key: \(APIConfig.shared.apiKey)")
                 throw OddsError.unauthorized
+            case 403:
+                throw OddsError.forbidden
+            case 429:
+                throw OddsError.rateLimitExceeded
             default:
                 throw OddsError.invalidResponse
             }
@@ -127,8 +143,16 @@ class SportradarOddsService {
             sport,
             pathComponent + ".json"
         ].joined(separator: "/")
+        
         var comps = URLComponents(string: urlString)!
-        comps.queryItems = [ URLQueryItem(name: "api_key", value: APIConfig.shared.apiKey) ]
+        comps.queryItems = [
+            URLQueryItem(name: "api_key", value: APIConfig.shared.apiKey),
+            URLQueryItem(name: "format", value: "json")
+        ]
+        
+        // Print URL for debugging (without API key)
+        print("🌐 Requesting URL:", urlString)
+        
         return comps.url!
     }
 }

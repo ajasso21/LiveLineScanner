@@ -103,6 +103,7 @@ struct EventDetailsView: View {
     // MARK: - Properties
     let event: Event
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var viewModel: GameBrowserViewModel
     @StateObject private var notificationManager = NotificationManager.shared
     
     // MARK: - State

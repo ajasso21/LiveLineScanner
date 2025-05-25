@@ -63,7 +63,7 @@ struct ErrorView: View {
 // MARK: - Main View
 struct OddsDetailView: View {
     let event: Event
-    @ObservedObject var vm: GameBrowserViewModel
+    @ObservedObject var viewModel: GameBrowserViewModel
     @State private var markets: [DisplayMarket] = []
     @State private var isLoading = false
     @State private var error: String?
@@ -96,7 +96,7 @@ struct OddsDetailView: View {
         let url = URL(string: "https://api.the-odds-api.com/v4/sports/\(event.sportKey)/events/\(event.id)/odds?apiKey=\(APIConfig.shared.apiKey)&regions=us")!
         
         do {
-            let (data, _) = try await vm.session.data(from: url)
+            let (data, _) = try await viewModel.session.data(from: url)
             let eventOdds = try JSONDecoder().decode(EventOdds.self, from: data)
             
             // Process first bookmaker's markets
@@ -132,7 +132,7 @@ struct OddsDetailView: View {
                 scores: nil,
                 lastUpdate: nil
             ),
-            vm: GameBrowserViewModel()
+            viewModel: GameBrowserViewModel()
         )
     }
 }

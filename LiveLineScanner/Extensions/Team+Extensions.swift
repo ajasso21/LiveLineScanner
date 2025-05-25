@@ -23,7 +23,7 @@ extension Team {
     }
     
     var totalWagered: Decimal {
-        (placedBets?.allObjects as? [Bet])?.reduce(Decimal(0)) { $0 + $1.amount } ?? 0
+        (placedBets?.allObjects as? [Bet])?.reduce(Decimal(0)) { $0 + (($1.amount as NSDecimalNumber?)?.decimalValue ?? 0) } ?? 0
     }
     
     var netProfit: Decimal {
@@ -31,7 +31,7 @@ extension Team {
             if bet.status == Bet.Status.won.rawValue {
                 return sum + ((bet.payout as NSDecimalNumber?)?.decimalValue ?? 0)
             } else if bet.status == Bet.Status.lost.rawValue {
-                return sum - bet.amount
+                return sum - ((bet.amount as NSDecimalNumber?)?.decimalValue ?? 0)
             }
             return sum
         }

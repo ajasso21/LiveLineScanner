@@ -179,42 +179,6 @@ struct ArbitrageView: View {
     }
 }
 
-// MARK: - Settings View
-struct SettingsView: View {
-    @ObservedObject var vm: ArbitrageViewModel
-    @Environment(\.dismiss) private var dismiss
-    
-    var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("True Probabilities")) {
-                    ForEach(vm.arbitrages.flatMap { $0.outcomes }, id: \.id) { info in
-                        HStack {
-                            Text(info.outcome)
-                            Spacer()
-                            TextField("True%", text: Binding(
-                                get: { vm.trueProbInputs[info.outcome] ?? "" },
-                                set: { vm.trueProbInputs[info.outcome] = $0 }
-                            ))
-                            .keyboardType(.decimalPad)
-                            .textFieldStyle(.roundedBorder)
-                            .frame(width: 60)
-                        }
-                    }
-                }
-            }
-            .navigationTitle("Settings")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-}
-
 #Preview {
     ArbitrageView(oddsVM: OddsComparisonViewModel())
 } 

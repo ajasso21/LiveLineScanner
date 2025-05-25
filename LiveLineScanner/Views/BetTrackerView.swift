@@ -153,9 +153,9 @@ struct BetTrackerView: View {
     private var currentBankroll: Decimal {
         transactions.reduce(Decimal(0)) { sum, transaction in
             if transaction.isDeposit {
-                return sum + (transaction.amount as NSDecimalNumber).decimalValue
+                return sum + ((transaction.amount as NSDecimalNumber?)?.decimalValue ?? 0)
             } else {
-                return sum - (transaction.amount as NSDecimalNumber).decimalValue
+                return sum - ((transaction.amount as NSDecimalNumber?)?.decimalValue ?? 0)
             }
         }
     }
@@ -165,7 +165,7 @@ struct BetTrackerView: View {
             if bet.betStatus == .won {
                 return sum + ((bet.payout as NSDecimalNumber?)?.decimalValue ?? 0)
             } else if bet.betStatus == .lost {
-                return sum - (bet.amount as NSDecimalNumber).decimalValue
+                return sum - ((bet.amount as NSDecimalNumber?)?.decimalValue ?? 0)
             }
             return sum
         }
@@ -178,9 +178,9 @@ struct BetTrackerView: View {
     }
     
     private var roi: Double {
-        let totalWagered = settledBets.reduce(Decimal(0)) { $0 + (($1.amount as NSDecimalNumber).decimalValue) }
+        let totalWagered = settledBets.reduce(Decimal(0)) { $0 + (($1.amount as NSDecimalNumber?)?.decimalValue ?? 0) }
         guard totalWagered > 0 else { return 0 }
-        return Double(netProfit / totalWagered)
+        return NSDecimalNumber(decimal: netProfit / totalWagered).doubleValue
     }
     
     // MARK: - Helper Functions
@@ -261,30 +261,6 @@ struct QuickActionButton: View {
     }
 }
 
-struct EmptyStateView: View {
-    let title: String
-    let message: String
-    let systemImage: String
-    
-    var body: some View {
-        VStack(spacing: 10) {
-            Image(systemName: systemImage)
-                .font(.system(size: 40))
-                .foregroundColor(.secondary)
-            Text(title)
-                .font(.headline)
-            Text(message)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-    }
-}
-
 struct BetRowView: View {
     let bet: Bet
     
@@ -302,7 +278,7 @@ struct BetRowView: View {
                 Spacer()
                 
                 VStack(alignment: .trailing) {
-                    Text(bet.formattedAmount)
+                    Text(formatCurrency((bet.amount as NSDecimalNumber?)?.decimalValue ?? 0))
                         .font(.headline)
                     Text(bet.formattedOdds)
                         .font(.subheadline)
@@ -323,7 +299,7 @@ struct BetRowView: View {
                     Spacer()
                     
                     if let payout = bet.payout {
-                        Text(payout.formatted(.currency(code: "USD")))
+                        Text(formatCurrency((payout as NSDecimalNumber?)?.decimalValue ?? 0))
                             .font(.subheadline)
                             .foregroundColor(bet.betStatus == .won ? .green : .red)
                     }
@@ -344,6 +320,13 @@ struct BetRowView: View {
         case .cancelled: return .gray
         default: return .blue
         }
+    }
+    
+    private func formatCurrency(_ value: Decimal) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.maximumFractionDigits = 2
+        return formatter.string(from: NSDecimalNumber(decimal: value)) ?? "$0.00"
     }
 }
 

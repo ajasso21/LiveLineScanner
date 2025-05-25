@@ -6,19 +6,23 @@ import UserNotifications
 // MARK: - API Configuration
 class APIConfig {
     static let shared = APIConfig()
+    
+    var apiKey: String = "U1TpntzxSZ31ttrm2o6O190nIddDSnkDbboHsbfN" {
+        didSet {
+            let trimmedKey = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmedKey.isEmpty {
+                UserDefaults.standard.set(trimmedKey, forKey: "sportradar_api_key")
+            }
+        }
+    }
+    
     private init() {
         loadSavedKey()
     }
     
-    var apiKey: String = "" {
-        didSet {
-            UserDefaults.standard.set(apiKey, forKey: "sportradar_api_key")
-        }
-    }
-    
     private func loadSavedKey() {
-        if let saved = UserDefaults.standard.string(forKey: "sportradar_api_key") {
-            apiKey = saved
+        if let savedKey = UserDefaults.standard.string(forKey: "sportradar_api_key") {
+            apiKey = savedKey.trimmingCharacters(in: .whitespacesAndNewlines)
         }
     }
     
@@ -108,7 +112,7 @@ struct SportType: Codable, Hashable, Identifiable {
 }
 
 // Sport model for the-odds-api.com
-struct APISport: Codable, Identifiable {
+struct APISport: Codable, Identifiable, Hashable {
     let key: String
     let group: String
     let title: String
@@ -117,6 +121,14 @@ struct APISport: Codable, Identifiable {
     let has_outrights: Bool
     
     var id: String { key }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(key)
+    }
+    
+    static func == (lhs: APISport, rhs: APISport) -> Bool {
+        lhs.key == rhs.key
+    }
 }
 
 struct EventOdds: Codable {
@@ -127,6 +139,12 @@ struct ScheduleResponse: Codable {
     let sport_event: SportEvent
     let markets: [Market]?
     let bookmakers: [Bookmaker]?
+}
+
+// Add new response wrapper
+struct SportradarResponse: Codable {
+    let generated_at: Date
+    let schedules: [ScheduleResponse]
 }
 
 // MARK: - View Models
@@ -329,9 +347,9 @@ class GameBrowserViewModel: ObservableObject {
     let session = URLSession.shared
     
     init() {
-        // Set the Sportradar API key if not already set
+        // Don't set a default API key - let the user set it in settings
         if APIConfig.shared.apiKey.isEmpty {
-            APIConfig.shared.apiKey = "YOUR_API_KEY_HERE" // Replace with your actual API key
+            print("⚠️ No API key set. Please set your API key in settings.")
         }
     }
     
@@ -341,6 +359,12 @@ class GameBrowserViewModel: ObservableObject {
 
     /// 1) Fetch available sports with odds coverage
     func fetchSports() async throws {
+        // Check if API key is set
+        guard APIConfig.shared.isKeyValid else {
+            errorMessage = "Please set your API key in settings"
+            throw OddsError.invalidAPIKey
+        }
+        
         // Check cache first
         if let cachedSports = await cache.getCachedSports() {
             sports = cachedSports
@@ -351,11 +375,8 @@ class GameBrowserViewModel: ObservableObject {
         defer { isLoading = false }
         
         do {
-            // Fetch schedules for prematch odds to determine available sports
-            let schedules = try await service.fetchSchedules(
-                product: .prematch,
-                sport: "all"  // Special value to get all sports
-            )
+            // Fetch schedules for all sports
+            let schedules = try await service.fetchSchedules()
             
             // Extract unique sport keys and map to titles
             let sportKeys = Set(schedules.compactMap { schedule -> String? in
@@ -386,14 +407,20 @@ class GameBrowserViewModel: ObservableObject {
             case .networkError(let err):
                 errorMessage = "Network error: \(err.localizedDescription)"
             case .invalidResponse:
-                errorMessage = "Invalid response from server."
+                errorMessage = "Invalid response from server. Please try again later."
             case .decodingError(let err):
                 errorMessage = "Failed to decode response: \(err.localizedDescription)"
+            case .invalidURL:
+                errorMessage = "Invalid API URL. Please check your settings."
+            case .forbidden:
+                errorMessage = "Access forbidden. Please check your API key permissions."
+            case .rateLimitExceeded:
+                errorMessage = "Rate limit exceeded. Please try again later."
             }
             print("⚠️ fetchSports:", error)
             throw error
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = "An unexpected error occurred: \(error.localizedDescription)"
             print("⚠️ fetchSports:", error)
             throw error
         }
@@ -418,8 +445,7 @@ class GameBrowserViewModel: ObservableObject {
         do {
             // Get schedules with event details
             let schedules = try await service.fetchSchedules(
-                product: .prematch,
-                sport: sport.key.replacingOccurrences(of: "sr:sport:", with: "")
+                for: sport.key.replacingOccurrences(of: "sr:sport:", with: "")
             )
             
             // Update cache
@@ -441,6 +467,12 @@ class GameBrowserViewModel: ObservableObject {
                 errorMessage = "Invalid response from server."
             case .decodingError(let err):
                 errorMessage = "Failed to decode response: \(err.localizedDescription)"
+            case .invalidURL:
+                errorMessage = "Invalid API URL. Please check your settings."
+            case .forbidden:
+                errorMessage = "Access forbidden. Please check your API key permissions."
+            case .rateLimitExceeded:
+                errorMessage = "Rate limit exceeded. Please try again later."
             }
             print("⚠️ fetchEvents:", error)
             throw error

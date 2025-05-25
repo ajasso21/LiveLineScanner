@@ -7,7 +7,7 @@ import Foundation
 struct OddsComparisonView: View {
     @EnvironmentObject private var gameBrowserVM: GameBrowserViewModel
     @StateObject private var viewModel = OddsComparisonViewModel()
-    @State private var selectedSport: Sport? = nil
+    @State private var selectedSport: APISport? = nil
     @State private var showFilters = false
     @State private var selectedMarkets: Set<String> = ["h2h", "spreads", "player_points"]
     @State private var selectedBooks: Set<String> = []
@@ -18,7 +18,7 @@ struct OddsComparisonView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                sportPicker
+                OddsSportPickerView(selectedSport: $selectedSport, sports: viewModel.sports)
                 searchAndSortBar
                 listView
             }
@@ -32,18 +32,6 @@ struct OddsComparisonView: View {
                 await viewModel.fetchSports() 
             }
         }
-    }
-
-    // MARK: - Subviews
-    private var sportPicker: some View {
-        Picker("Sport", selection: $selectedSport) {
-            ForEach(viewModel.sports) { sport in
-                Text(sport.title).tag(Optional(sport))
-            }
-        }
-        .pickerStyle(.menu)
-        .padding()
-        .background(Color.themeCard)
     }
 
     private var searchAndSortBar: some View {
@@ -82,7 +70,11 @@ struct OddsComparisonView: View {
                     .padding(.top)
                 }
                 .background(Color.themeBackground)
-                .refreshable { await viewModel.fetchBestLines(for: sport) }
+                .refreshable { 
+                    if selectedSport != nil {
+                        await viewModel.fetchBestLines(for: selectedSport!)
+                    }
+                }
             } else {
                 Spacer()
                 Text("Select a sport to view odds")
@@ -124,9 +116,11 @@ struct OddsComparisonView: View {
     }
 
     private var filtersSheet: some View {
-        FiltersView(
-            markets: viewModel.allMarkets,
-            books: viewModel.allBooks,
+        let markets = viewModel.allMarkets
+        let books = viewModel.allBooks
+        return FiltersView(
+            markets: markets,
+            books: books,
             selectedMarkets: $selectedMarkets,
             selectedBooks: $selectedBooks
         )
@@ -138,22 +132,42 @@ struct OddsComparisonView: View {
 
     // MARK: - Data Processing
     private var filteredAndSortedLines: [OddsLine] {
-        var lines = viewModel.bestLines
+        let lines = viewModel.bestLines
+        return lines
             .filter { selectedMarkets.contains($0.market) }
             .filter { selectedBooks.isEmpty || selectedBooks.contains($0.bestBook) }
             .filter { searchText.isEmpty ||
                 $0.market.localizedCaseInsensitiveContains(searchText) ||
                 $0.outcome.localizedCaseInsensitiveContains(searchText)
             }
-        switch sortOption {
-        case .moveMagnitude:
-            lines.sort { abs($0.movement ?? 0) > abs($1.movement ?? 0) }
-        case .market:
-            lines.sort { $0.market < $1.market }
-        case .alphabetical:
-            lines.sort { $0.outcome < $1.outcome }
+            .sorted { line1, line2 in
+                switch sortOption {
+                case .moveMagnitude:
+                    return abs(line1.movement ?? 0) > abs(line2.movement ?? 0)
+                case .market:
+                    return line1.market < line2.market
+                case .alphabetical:
+                    return line1.outcome < line2.outcome
+                }
+            }
+    }
+}
+
+// MARK: - OddsSportPickerView
+struct OddsSportPickerView: View {
+    @Binding var selectedSport: APISport?
+    let sports: [APISport]
+
+    var body: some View {
+        Picker("Sport", selection: $selectedSport) {
+            Text("Select Sport").tag(Optional<APISport>.none)
+            ForEach(sports, id: \.self) { sport in
+                Text(sport.title).tag(Optional<APISport>.some(sport))
+            }
         }
-        return lines
+        .pickerStyle(.menu)
+        .padding()
+        .background(Color.themeCard)
     }
 }
 

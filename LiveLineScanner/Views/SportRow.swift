@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SportRow: View {
-    let sport: Sport
+    let sport: SportType
     let events: [Event]
     let isExpanded: Bool
     let isFavorite: Bool

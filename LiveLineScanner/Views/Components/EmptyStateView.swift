@@ -23,4 +23,12 @@ struct EmptyStateView: View {
         .background(Color(.systemBackground))
         .cornerRadius(12)
     }
+}
+
+#Preview {
+    EmptyStateView(
+        title: "No Items",
+        message: "There are no items to display",
+        systemImage: "tray"
+    )
 } 

@@ -12,7 +12,7 @@ extension Bet {
         case cancelled = "Cancelled"
     }
     
-    enum BetType: String {
+    enum BetType: String, CaseIterable {
         case moneyline = "Moneyline"
         case spread = "Spread"
         case overUnder = "Over/Under"
