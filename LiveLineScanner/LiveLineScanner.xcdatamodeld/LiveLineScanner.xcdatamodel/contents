@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22522" systemVersion="24E5178i" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
-    <entity name="Bet" representedClassName="LiveLineScanner.Bet" syncable="YES" codeGenerationType="category">
+    <entity name="Bet" representedClassName="LiveLineScanner.Bet" syncable="YES" codeGenerationType="class">
         <attribute name="amount" attributeType="Decimal" defaultValueString="0.0"/>
         <attribute name="createdAt" attributeType="Date" defaultDateTimeInterval="0" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="UUID" defaultValueString="00000000-0000-0000-0000-000000000000"/>
@@ -15,20 +15,20 @@
         <relationship name="sport" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Sport" inverseName="bets" inverseEntity="Sport"/>
         <relationship name="team" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Team" inverseName="placedBets" inverseEntity="Team"/>
     </entity>
-    <entity name="BankrollTransaction" representedClassName="LiveLineScanner.BankrollTransaction" syncable="YES" codeGenerationType="category">
+    <entity name="BankrollTransaction" representedClassName="LiveLineScanner.BankrollTransaction" syncable="YES" codeGenerationType="class">
         <attribute name="amount" attributeType="Decimal" defaultValueString="0.0"/>
         <attribute name="createdAt" attributeType="Date" defaultDateTimeInterval="0" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="UUID" defaultValueString="00000000-0000-0000-0000-000000000000"/>
         <attribute name="notes" optional="YES" attributeType="String"/>
         <attribute name="type" attributeType="String" defaultValueString="Deposit"/>
     </entity>
-    <entity name="Sport" representedClassName="LiveLineScanner.Sport" syncable="YES" codeGenerationType="category">
+    <entity name="Sport" representedClassName="LiveLineScanner.Sport" syncable="YES" codeGenerationType="class">
         <attribute name="id" attributeType="UUID" defaultValueString="00000000-0000-0000-0000-000000000000"/>
         <attribute name="name" attributeType="String" defaultValueString=""/>
         <relationship name="bets" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Bet" inverseName="sport" inverseEntity="Bet"/>
         <relationship name="teams" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Team" inverseName="sport" inverseEntity="Team"/>
     </entity>
-    <entity name="Team" representedClassName="LiveLineScanner.Team" syncable="YES" codeGenerationType="category">
+    <entity name="Team" representedClassName="LiveLineScanner.Team" syncable="YES" codeGenerationType="class">
         <attribute name="id" attributeType="UUID" defaultValueString="00000000-0000-0000-0000-000000000000"/>
         <attribute name="name" attributeType="String" defaultValueString=""/>
         <relationship name="placedBets" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Bet" inverseName="team" inverseEntity="Bet"/>

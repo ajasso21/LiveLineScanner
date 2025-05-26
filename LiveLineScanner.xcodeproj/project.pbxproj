@@ -7,7 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		931C5DB32DE3E8F0001559CB /* SwiftUICharts in Frameworks */ = {isa = PBXBuildFile; productRef = 931C5DB22DE3E8F0001559CB /* SwiftUICharts */; };
+		931C5DE52DE3EC85001559CB /* Hero in Frameworks */ = {isa = PBXBuildFile; productRef = 931C5DE42DE3EC85001559CB /* Hero */; };
 		93A7BEE52DE00F4500F4FC94 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = 93A7BEE42DE00F4500F4FC94 /* Starscream */; };
+		93B8E7712DE419A000E84600 /* OpenAI in Frameworks */ = {isa = PBXBuildFile; productRef = 93B8E7702DE419A000E84600 /* OpenAI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +60,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				93A7BEE52DE00F4500F4FC94 /* Starscream in Frameworks */,
+				931C5DB32DE3E8F0001559CB /* SwiftUICharts in Frameworks */,
+				931C5DE52DE3EC85001559CB /* Hero in Frameworks */,
+				93B8E7712DE419A000E84600 /* OpenAI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,12 +83,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		931C5DE32DE3EC85001559CB /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		93A7BEAB2DE00F0100F4FC94 = {
 			isa = PBXGroup;
 			children = (
 				93A7BEB62DE00F0100F4FC94 /* LiveLineScanner */,
 				93A7BEC92DE00F0200F4FC94 /* LiveLineScannerTests */,
 				93A7BED32DE00F0200F4FC94 /* LiveLineScannerUITests */,
+				931C5DE32DE3EC85001559CB /* Frameworks */,
 				93A7BEB52DE00F0100F4FC94 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -111,6 +125,9 @@
 			buildRules = (
 			);
 			dependencies = (
+				93804E492DE4118B0009ED44 /* PBXTargetDependency */,
+				93804E452DE411830009ED44 /* PBXTargetDependency */,
+				93804E432DE411730009ED44 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				93A7BEB62DE00F0100F4FC94 /* LiveLineScanner */,
@@ -118,6 +135,9 @@
 			name = LiveLineScanner;
 			packageProductDependencies = (
 				93A7BEE42DE00F4500F4FC94 /* Starscream */,
+				931C5DB22DE3E8F0001559CB /* SwiftUICharts */,
+				931C5DE42DE3EC85001559CB /* Hero */,
+				93B8E7702DE419A000E84600 /* OpenAI */,
 			);
 			productName = LiveLineScanner;
 			productReference = 93A7BEB42DE00F0100F4FC94 /* LiveLineScanner.app */;
@@ -203,6 +223,9 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				93A7BEE32DE00F3000F4FC94 /* XCRemoteSwiftPackageReference "Starscream" */,
+				931C5DA92DE3E71A001559CB /* XCRemoteSwiftPackageReference "Hero" */,
+				931C5DB12DE3E8F0001559CB /* XCRemoteSwiftPackageReference "SwiftUICharts" */,
+				93B8E76F2DE419A000E84600 /* XCRemoteSwiftPackageReference "OpenAI" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 93A7BEB52DE00F0100F4FC94 /* Products */;
@@ -265,6 +288,18 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		93804E432DE411730009ED44 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 93804E422DE411730009ED44 /* Starscream */;
+		};
+		93804E452DE411830009ED44 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 93804E442DE411830009ED44 /* Hero */;
+		};
+		93804E492DE4118B0009ED44 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 93804E482DE4118B0009ED44 /* SwiftUICharts */;
+		};
 		93A7BEC82DE00F0200F4FC94 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 93A7BEB32DE00F0100F4FC94 /* LiveLineScanner */;
@@ -409,8 +444,8 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -418,9 +453,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Jasso.LiveLineScanner;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -436,8 +475,8 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -445,9 +484,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Jasso.LiveLineScanner;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -561,6 +604,22 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		931C5DA92DE3E71A001559CB /* XCRemoteSwiftPackageReference "Hero" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/HeroTransitions/Hero.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.6.4;
+			};
+		};
+		931C5DB12DE3E8F0001559CB /* XCRemoteSwiftPackageReference "SwiftUICharts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/willdale/SwiftUICharts";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.10.4;
+			};
+		};
 		93A7BEE32DE00F3000F4FC94 /* XCRemoteSwiftPackageReference "Starscream" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/daltoniam/Starscream.git";
@@ -569,13 +628,51 @@
 				minimumVersion = 4.0.0;
 			};
 		};
+		93B8E76F2DE419A000E84600 /* XCRemoteSwiftPackageReference "OpenAI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/MacPaw/OpenAI.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.4.3;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		931C5DB22DE3E8F0001559CB /* SwiftUICharts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 931C5DB12DE3E8F0001559CB /* XCRemoteSwiftPackageReference "SwiftUICharts" */;
+			productName = SwiftUICharts;
+		};
+		931C5DE42DE3EC85001559CB /* Hero */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 931C5DA92DE3E71A001559CB /* XCRemoteSwiftPackageReference "Hero" */;
+			productName = Hero;
+		};
+		93804E422DE411730009ED44 /* Starscream */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 93A7BEE32DE00F3000F4FC94 /* XCRemoteSwiftPackageReference "Starscream" */;
+			productName = Starscream;
+		};
+		93804E442DE411830009ED44 /* Hero */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 931C5DA92DE3E71A001559CB /* XCRemoteSwiftPackageReference "Hero" */;
+			productName = Hero;
+		};
+		93804E482DE4118B0009ED44 /* SwiftUICharts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 931C5DB12DE3E8F0001559CB /* XCRemoteSwiftPackageReference "SwiftUICharts" */;
+			productName = SwiftUICharts;
+		};
 		93A7BEE42DE00F4500F4FC94 /* Starscream */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 93A7BEE32DE00F3000F4FC94 /* XCRemoteSwiftPackageReference "Starscream" */;
 			productName = Starscream;
+		};
+		93B8E7702DE419A000E84600 /* OpenAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 93B8E76F2DE419A000E84600 /* XCRemoteSwiftPackageReference "OpenAI" */;
+			productName = OpenAI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
