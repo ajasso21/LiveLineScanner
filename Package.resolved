@@ -1,0 +1,61 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Hero",
+        "repositoryURL": "https://github.com/HeroTransitions/Hero.git",
+        "state": {
+          "branch": null,
+          "revision": "670b81ed3d95f7183bbc009d0ec67c71506557b5",
+          "version": "1.6.4"
+        }
+      },
+      {
+        "package": "OpenAI",
+        "repositoryURL": "https://github.com/MacPaw/OpenAI.git",
+        "state": {
+          "branch": null,
+          "revision": "9261cd39d55a718bcc360fbc29515a331cad5dbb",
+          "version": "0.4.3"
+        }
+      },
+      {
+        "package": "Starscream",
+        "repositoryURL": "https://github.com/daltoniam/Starscream.git",
+        "state": {
+          "branch": null,
+          "revision": "c6bfd1af48efcc9a9ad203665db12375ba6b145a",
+          "version": "4.0.8"
+        }
+      },
+      {
+        "package": "swift-http-types",
+        "repositoryURL": "https://github.com/apple/swift-http-types",
+        "state": {
+          "branch": null,
+          "revision": "a0a57e949a8903563aba4615869310c0ebf14c03",
+          "version": "1.4.0"
+        }
+      },
+      {
+        "package": "swift-openapi-runtime",
+        "repositoryURL": "https://github.com/apple/swift-openapi-runtime",
+        "state": {
+          "branch": null,
+          "revision": "8f33cc5dfe81169fb167da73584b9c72c3e8bc23",
+          "version": "1.8.2"
+        }
+      },
+      {
+        "package": "SwiftUICharts",
+        "repositoryURL": "https://github.com/willdale/SwiftUICharts.git",
+        "state": {
+          "branch": null,
+          "revision": "e8be1b388b56bab0379fb4fc0900d9753723b065",
+          "version": "1.1.4"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

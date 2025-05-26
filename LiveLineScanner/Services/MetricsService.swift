@@ -8,7 +8,7 @@ class MetricsService {
         self.openAIService = openAIService
     }
     
-    func fetchMetrics(for game: Game) async throws -> ChatGPTMetrics {
+    func fetchMetrics(for game: SportsGame) async throws -> ChatGPTMetrics {
         return try await openAIService.analyzeGame(game)
     }
 } 

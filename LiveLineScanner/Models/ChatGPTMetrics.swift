@@ -11,4 +11,4 @@ public struct ChatGPTMetrics {
         self.weatherImpact = weatherImpact
         self.trends = trends
     }
-} 
+}
